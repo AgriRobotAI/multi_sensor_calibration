@@ -17,51 +17,47 @@
 */
 
 #pragma once
-#include <ros/ros.h>
-#include <radar_msgs/RadarDetectionArray.h>
-#include <pcl_ros/point_cloud.h>
+
+#include <pcl/point_types.h>
+
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <std_msgs/msg/header.hpp>
+#include <visualization_msgs/msg/marker.hpp>
 
 namespace radar_detector {
 
-/// Class with a node, subscribing to a radar measurement and publishes transformed calibration pattern
-class RadarDetectorNode {
+// Node, subscribing to a radar measurement and publishes transformed calibration pattern
+class RadarDetectorNode : public rclcpp::Node {
 public:
-
-	/// Constructor taking the node handle as a member variable
-	RadarDetectorNode(ros::NodeHandle & nh);
+  RadarDetectorNode();
 
 private:
+  // Define specfic RCS values range
+  float min_RCS_;
+  float max_RCS_;
+  float min_range_object_;
+  float max_range_object_;
+  bool select_range_;
+  bool select_min_;
 
-	/// Define specfic RCS values range
-	float min_RCS_;
-	float max_RCS_;
-	float min_range_object_;
-	float max_range_object_;
-	bool select_range_;
-	bool select_min_;
+  // Subscriber for radar messages point cloud
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr radar_subscriber_;
 
-	/// Ros Node Handle to communicate with ros server
-	ros::NodeHandle nh_;
+  // Publisher for resulting pattern point cloud
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pattern_publisher_;
 
-	/// Subscriber for radar messages point cloud
-	ros::Subscriber radar_subscriber_;
+  // Publisher for resulting pattern as a marker for rviz
+  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_publisher_;
 
-	/// Publisher for resulting pattern point cloud
-	ros::Publisher pattern_publisher_;
+  // Function to convert to a point cloud type and publish pattern
+  void publishPattern(pcl::PointXYZ const & point, std_msgs::msg::Header const & header);
 
-	/// Publisher for resulting pattern as a marker for rviz
-	ros::Publisher marker_publisher_;
+  // Function to convert to a marker and publish pattern
+  void publishMarker(pcl::PointXYZ const & point, std_msgs::msg::Header const & header);
 
-	/// Function to convert to a point cloud type and publish pattern
-	void publishPattern(pcl::PointXYZ const & point, std_msgs::Header const & header);
-
-	/// Function to convert to a marker and publish pattern
-	void publishMarker(pcl::PointXYZ const & point, std_msgs::Header const & header);
-
-	/// Point cloud callback function
-	void callback(radar_msgs::RadarDetectionArray const & in);
-
+  // Point cloud callback function
+  void callback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr& in);
 };
 
-
-}
+}  // namespace radar_detector

@@ -17,11 +17,14 @@
 */
 
 #pragma once
+
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <radar_msgs/RadarDetectionArray.h>
-#include <radar_msgs/RadarDetection.h>
 
+#include <limits>
+#include <string>
+
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
 namespace radar_detector {
     const std::string RCS_BASED_SELECTION = "rcs";
@@ -29,7 +32,7 @@ namespace radar_detector {
     const std::string SELECT_MAX =  "max";
     const std::string SELECT_MIN =  "min";
 
-pcl::PointXYZ keypointDetection(radar_msgs::RadarDetectionArray const & in,
+pcl::PointXYZ keypointDetection(const sensor_msgs::msg::PointCloud2::ConstSharedPtr& in,
                                 float const min = std::numeric_limits<float>::lowest(),
                                 float const max = std::numeric_limits<float>::max(),
                                 float const min_range = std::numeric_limits<float>::lowest(),
@@ -38,4 +41,4 @@ pcl::PointXYZ keypointDetection(radar_msgs::RadarDetectionArray const & in,
                                 bool const select_min = true);
 
 
-}
+}  // namespace radar_detector

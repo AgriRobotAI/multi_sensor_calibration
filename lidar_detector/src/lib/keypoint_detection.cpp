@@ -17,11 +17,11 @@
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "keypoint_detection.hpp"
-#include "visualize.hpp"
+#include "lidar_detector/keypoint_detection.hpp"
+#include "lidar_detector/visualize.hpp"
 
 #include <pcl/octree/octree_search.h>
-#include <common/robust_least_squares.hpp>
+#include "calibration_common/robust_least_squares.hpp"
 
 namespace lidar_detector {
 namespace {
@@ -35,7 +35,7 @@ pcl::PointCloud<Lidar::PointWithDist> passThrough(
 	pass.setInputCloud(cloud.makeShared());
 	pass.setFilterFieldName(config.dim);
 	pass.setFilterLimits(config.min, config.max);
-	pass.setFilterLimitsNegative(false);
+	pass.setNegative(false);
 	pass.setKeepOrganized(false);
 	pcl::PointCloud<Lidar::PointWithDist> out;
 	pass.filter(out);
@@ -102,7 +102,7 @@ pcl::PointCloud<Lidar::PointWithDist> filterPlane(
 std::vector<std::vector<Lidar::PointWithDist*> > getRings(pcl::PointCloud<Lidar::PointWithDist> & in, LidarParameters const & lidar_parameters) {
 	std::vector<std::vector<Lidar::PointWithDist*> > rings(lidar_parameters.number_layers);
 	for (std::size_t i = 0; i < in.size(); ++i) {
-		rings[in.at(i).ring].push_back(&(in.at(i)));
+		rings.at(in.at(i).ring).push_back(&(in.at(i)));
 	}
 	return rings;
 }
@@ -121,7 +121,7 @@ void visualize(std::vector<std::vector<Lidar::PointWithDist*> > const & rings) {
 	pcl::visualization::PCLVisualizer viewer;
 	for (std::size_t i = 0; i < rings.size(); ++i) {
 		pcl::PointCloud<pcl::PointXYZ> cloud = toCloud(rings.at(i));
-		viewer.addPointCloud<pcl::PointXYZ>(cloud.makeShared(), boost::to_string(i));
+		viewer.addPointCloud<pcl::PointXYZ>(cloud.makeShared(), boost::lexical_cast<std::string>(i));
 		viewer.spin();
 	}
 	viewer.addCoordinateSystem();
@@ -136,7 +136,7 @@ bool isFewPoints(std::vector<Lidar::PointWithDist*> const in) {
 /// Detect edges based on distances with respect to neighbouring points in the filtered velodyne point cloud
 std::vector<std::vector<Lidar::PointWithDist*> > toDistanceRing(pcl::PointCloud<Lidar::PointWithDist> & in, float & average_distance_ring, LidarParameters const & lidar_parameters) {
 	// Loop over the rings
-	int max_points_ring = 0;
+	unsigned int max_points_ring = 0;
 	std::vector<std::vector<Lidar::PointWithDist*> > rings = getRings(in, lidar_parameters);
 	rings.erase(std::remove_if(rings.begin(), rings.end(), isFewPoints), rings.end()); // c++03 compatible
 	for (std::vector<std::vector<Lidar::PointWithDist*> >::iterator ring = rings.begin(); ring < rings.end(); ring++){
@@ -168,7 +168,7 @@ std::vector<std::vector<Lidar::PointWithDist*> > toDistanceRing(pcl::PointCloud<
 /// Create edges point cloud
 pcl::PointCloud<Lidar::PointWithDist> createEdgeCloud(pcl::PointCloud<Lidar::PointWithDist> const & cloud, CloudEdgeFilter const & config, float const average_distance_ring) {
 	pcl::PointCloud<Lidar::PointWithDist> edges_cloud;
-	float min_threshold = 3*average_distance_ring; // min gap is 3 times resolution
+	float min_threshold = average_distance_ring; // min gap is the resolution
 	float max_threshold = (2*config.radius + 2*average_distance_ring); // Gap cannot be larger than diameter plus 2 times resolution
 	for (std::size_t i = 0; i < cloud.size(); ++i) {
 		if (cloud.at(i).distance > min_threshold && cloud.at(i).distance < max_threshold ) { // jump should be smaller or equal to diameter + 2* angeluar resuoltion
@@ -270,7 +270,7 @@ bool processCircle(pcl::PointCloud<pcl::PointXYZ> & cloud, pcl::PointCloud<Lidar
 /// Detect circles and return point cloud with centroids of calibration pattern
 pcl::PointCloud<pcl::PointXYZ> processCircles(pcl::PointCloud<pcl::PointXYZ> & cloud, pcl::PointCloud<Lidar::PointWithDist> & plane, CircleDetection const & config) {
 	pcl::PointCloud<pcl::PointXYZ> out;
-	std::size_t iteration = 0;
+	int iteration = 0;
 	while (out.size() < 4 && iteration < config.cluster_iterations) { // The calibration board consists of four circles that need to be detected
 		iteration++;
 		pcl::PointXYZ point;
@@ -342,7 +342,7 @@ Eigen::Matrix3Xd projectToCalibrationBoardPlane(Eigen::Matrix3Xd in, pcl::ModelC
 	normal_vector << coefficients_plane.values[0], coefficients_plane.values[1], coefficients_plane.values[2];
 
 	Eigen::Matrix3Xd out = Eigen::Matrix3Xd::Zero(in.rows(), in.cols());
-	for (size_t i = 0; i < in.cols(); i++) {
+	for (int i = 0; i < in.cols(); i++) {
 		// compute disntance
 		double distance = normal_vector.dot(in.col(i)) + coefficients_plane.values[3];
 		// Correct point using normal and distance
@@ -380,7 +380,7 @@ pcl::PointCloud<pcl::PointXYZ> keypointDetection(pcl::PointCloud<Lidar::PointWit
 	pcl::PointCloud<Lidar::PointWithDist> cloud_calibration_board = filterPlane(cloud_without_ground_floor, config.calibration_board_filter);
 
 	// Edge detection: Loop over all rings, and then over all points, and calculate distance w.r.t. neighbors.
-	float average_distance_ring;
+	float average_distance_ring = 0.0;
 	std::vector<std::vector<Lidar::PointWithDist*> > rings = toDistanceRing(cloud_calibration_board, average_distance_ring, config.lidar_parameters);
 	if (config.visualize) { visualize(rings); }
 

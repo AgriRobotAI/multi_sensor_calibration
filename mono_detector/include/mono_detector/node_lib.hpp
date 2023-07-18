@@ -17,50 +17,48 @@
 */
 
 #pragma once
-#include "types.hpp"
-#include <ros/ros.h>
-#include <sensor_msgs/Image.h>
-#include <pcl_ros/point_cloud.h>
-#include <sensor_msgs/CameraInfo.h>
-#include <image_geometry/pinhole_camera_model.h> // ToDo: Remove ros dependency
+
+#include <vector>
+
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/camera_info.hpp>
+#include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+
+#include "mono_detector/types.hpp"
 
 namespace mono_detector {
 
-/// Class with a node, subscribing to image, camera info and publishes point cloud of calibration pattern
-class MonoDetectorNode {
+/// Node, subscribing to image, camera info and publishes point cloud of calibration pattern
+class MonoDetectorNode : public rclcpp::Node {
 public:
-	/// Constructor taking the node handle as a member variable
-	MonoDetectorNode(ros::NodeHandle & nh);
+  MonoDetectorNode();
 
 private:
+  /// Publisher for resulting pattern point cloud
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr point_cloud_publisher_;
 
-	/// Ros Node Handle to communicate with ros server
-	ros::NodeHandle nh_;
+  /// Subscriber for input images
+  rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_subscriber_;
 
-	/// Publisher for resulting pattern point cloud
-	ros::Publisher point_cloud_publisher_;
+  /// Subscriber for camera info
+  rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_subscriber_;
 
-	/// Subscriber for input images
-	ros::Subscriber image_subscriber_;
+  /// Configuration of parameters, intrinsics, visualization
+  Configuration config_;
 
-	/// Subscriber for camera info
-	ros::Subscriber camera_info_subscriber_;
+  /// Intrinsics
+  CameraModel intrinsics_;
+  bool intrinsics_received_ = false;
 
-	/// Configuration of parameters, intrinsics, visualization
-	Configuration config_;
+  /// Object points
+  std::vector<cv::Point3f> object_points_;
 
-	/// Intrinsics
-	image_geometry::PinholeCameraModel intrinsics_;
+  /// Image callback, subscribes to image, detects pattern and publishes pattern point cloud
+  void imageCallback(sensor_msgs::msg::Image::ConstSharedPtr const & in);
 
-	/// Object points
-	std::vector<cv::Point3f> object_points_;
-
-	/// Image callback, subscribes to image, detects pattern and publishes pattern point cloud
-	void imageCallback(sensor_msgs::ImageConstPtr const & in);
-
-	/// Camera info callback
-	void cameraInfoCallback(sensor_msgs::CameraInfo const & camera_info);
+  /// Camera info callback
+  void cameraInfoCallback(sensor_msgs::msg::CameraInfo const & camera_info);
 };
 
-}
-
+}  // namespace mono_detector

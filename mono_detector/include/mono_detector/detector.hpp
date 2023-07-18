@@ -17,18 +17,21 @@
 */
 
 #pragma once
+
+#include <vector>
+
 #include <opencv2/opencv.hpp>
-#include <array>
-#include "types.hpp"
+
+#include "mono_detector/types.hpp"
+#include "mono_detector/util.hpp"
 
 namespace mono_detector {
 
-/// Function to calculate the location of the calibration board in the image (pixel coordinates)
-void detectMono(
-	cv::Mat const & image,
-	Configuration const & configuration,
-	std::vector<cv::Point2f> & centers,
-	std::vector<float> & radi
+/// Function to calculate the location of the calibration board in the world
+Eigen::Isometry3f detectMono(
+  cv::Mat const & image,
+  Configuration const & configuration,
+  CameraModel const & intrinsics
 );
 
-}
+}  // namespace mono_detector

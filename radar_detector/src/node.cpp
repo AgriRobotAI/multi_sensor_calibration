@@ -16,17 +16,14 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "node_lib.hpp"
+#include "radar_detector/node_lib.hpp"
 
-int main(int argc, char * * argv) {
-	ros::init(argc, argv, "radar_detector");
+int main(int argc, char **argv) {
+  rclcpp::init(argc, argv);
+  auto node = std::make_shared<radar_detector::RadarDetectorNode>();
 
-	ros::NodeHandle private_node_handle("~");
+  rclcpp::spin(node);
+  rclcpp::shutdown();
 
-	radar_detector::RadarDetectorNode radar_detector_node(private_node_handle);
-
-	ros::spin();
-
-	return 0;
+  return 0;
 }
-

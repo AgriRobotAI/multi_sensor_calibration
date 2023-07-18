@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<package>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
     <name>optimization</name>
     <version>0.0.0</version>
     <description>The optimization package</description>
@@ -8,15 +9,15 @@
 
     <license>GPLv3</license>
 
-    <build_depend>message_generation</build_depend>
-    <build_depend>rostest</build_depend>
-    <build_depend>std_msgs</build_depend>
-    <build_depend>accumulator</build_depend>
+    <exec_depend>rclpy</exec_depend>
+    <exec_depend>std_msgs</exec_depend>
+    <exec_depend>calibration_interfaces</exec_depend>
 
-    <run_depend>message_runtime</run_depend>
-    <run_depend>rospy</run_depend>
-    <run_depend>std_msgs</run_depend>
-    <run_depend>accumulator</run_depend>
+    <exec_depend>python3-rmsd-pip</exec_depend>
+    <exec_depend>python3-tikzplotlib-pip</exec_depend>
+    <exec_depend>python3-sklearn</exec_depend>
 
-    <buildtool_depend>catkin</buildtool_depend>
+    <export>
+        <build_type>ament_python</build_type>
+    </export>
 </package>
