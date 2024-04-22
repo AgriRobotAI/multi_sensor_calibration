@@ -1,9 +1,9 @@
-marker_size: 0.095
+marker_size: 0.1
 
-roi:                        # Region of interest to find circles
-    x: 200
-    y: 100
-    width: 800
-    height: 500
+roi: # Region of interest to find circles
+    x: 
+    y: 490
+    width: 270
+    height: 490
 
 visualize: true

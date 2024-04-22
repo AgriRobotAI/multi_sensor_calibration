@@ -19,7 +19,7 @@
 
 #!/bin/bash
 
-rosrun lidar_detector lidar_detector_cli \
-	`rospack find lidar_detector`/example/lidar.pcd \
-	`rospack find lidar_detector`/config/config.yaml \
-	`rospack find lidar_detector`/example/out.pcd 
+ros2 run lidar_detector lidar_detector_cli \
+	`ros2 pkg prefix lidar_detector`/example/lidar.pcd \
+	`ros2 pkg prefix lidar_detector`/config/config.yaml \
+	`ros2 pkg prefix lidar_detector`/example/out.pcd 
