@@ -69,9 +69,9 @@ ament_target_dependencies(${PROJECT_NAME}_node ${deps} calibration_common)
 target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME}_ros ${PCL_LIBRARIES})
 
 # Command line interface for the library (no ros)
-add_executable(${PROJECT_NAME}_cli src/cli.cpp)
-ament_target_dependencies(${PROJECT_NAME}_cli ${deps})
-target_link_libraries(${PROJECT_NAME}_cli ${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+# add_executable(${PROJECT_NAME}_cli src/cli.cpp)
+# ament_target_dependencies(${PROJECT_NAME}_cli ${deps})
+# target_link_libraries(${PROJECT_NAME}_cli ${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 install(TARGETS
   ${PROJECT_NAME}_yaml ${PROJECT_NAME} ${PROJECT_NAME}_ros
@@ -79,11 +79,7 @@ install(TARGETS
 )
 install(TARGETS
   ${PROJECT_NAME}_node
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(TARGETS
-  ${PROJECT_NAME}_cli
+  # ${PROJECT_NAME}_cli
   DESTINATION lib/${PROJECT_NAME}
 )
 

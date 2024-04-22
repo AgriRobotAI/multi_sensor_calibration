@@ -73,12 +73,12 @@ void LidarDetectorNode::callback(sensor_msgs::msg::PointCloud2::ConstSharedPtr c
 	try {
 		pcl::PointCloud<Lidar::PointWithDist> cloud;
 		pcl::fromROSMsg(*in, cloud);
-		pcl::PointCloud<pcl::PointXYZ> pattern = keypointDetection(cloud, config_);
+		pcl::PointCloud<Lidar::cloud_calibration_boardcloud_calibration_board> pattern = keypointDetection(cloud, config_);
 		sensor_msgs::msg::PointCloud2 out;
 		pcl::toROSMsg(pattern, out);
 		out.header = in->header;
 		point_cloud_publisher_->publish(out);
-		publishMarker(pattern, in->header);
+		// publishMarker(pattern, in->header);
 	} catch (pcl::PCLException & e) {
 		RCLCPP_INFO_ONCE(get_logger(), "Ignoring exceptions thrown by pcl in at least one frame.");
 	}

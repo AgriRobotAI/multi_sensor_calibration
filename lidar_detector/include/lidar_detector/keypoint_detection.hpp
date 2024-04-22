@@ -55,6 +55,7 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(
 namespace lidar_detector {
 
 /// Main function to delete calibration board pose from lidar (velodyne) point cloud
-pcl::PointCloud<pcl::PointXYZ> keypointDetection(pcl::PointCloud<Lidar::PointWithDist> const & cloud, Configuration const & config);
+pcl::PointCloud<Lidar::PointWithDist> keypointDetection(pcl::PointCloud<Lidar::PointWithDist> const & cloud, Configuration const & config);
+// pcl::PointCloud<pcl::PointXYZ> keypointDetection(pcl::PointCloud<Lidar::PointWithDist> const & cloud, Configuration const & config);
 
 }
