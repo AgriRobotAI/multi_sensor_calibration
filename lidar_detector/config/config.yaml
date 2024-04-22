@@ -26,10 +26,10 @@ calibration_board_filter:                        # Parameters to extract planar 
     return_projected: true
 
 circle_detection:                                # Parameters to fit circles in pointcloud
-    distance_threshold: 0.5
+    distance_threshold: 0.0
     max_iterations: 1000
-    min_radius: 0.05                             # Minimum radius to search for circles
-    max_radius: 0.20                             # Maximum radius to search for circles
+    min_radius: 0.1                              # Minimum radius to search for circles
+    max_radius: 0.2                              # Maximum radius to search for circles
     cluster_iterations: 100
     max_points_within_radius: 5                  # Maximum nr of points to be allowed within radius (radius_max_points), which determines if circle proposal is valid.
     radius_max_points: 0.15                      # Circle radius to count number of points
