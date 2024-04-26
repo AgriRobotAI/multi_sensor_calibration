@@ -30,12 +30,12 @@ cloud_edge_filter:                               # Parameters to detect edges in
     threshold: 0.5                               # TODO: can be removed, because this value is not used.
 
 circle_detection:                                # Parameters to fit circles in pointcloud
-    distance_threshold: 0.05
+    distance_threshold: 0.1
     max_iterations: 1000
     min_radius: 0.1                              # Minimum radius to search for circles
     max_radius: 0.2                              # Maximum radius to search for circles
     cluster_iterations: 100
-    max_points_within_radius: 5                  # Maximum nr of points to be allowed within radius (radius_max_points), which determines if circle proposal is valid.
+    max_points_within_radius: 10                 # Maximum nr of points to be allowed within radius (radius_max_points), which determines if circle proposal is valid.
     radius_max_points: 0.15                      # Circle radius to count number of points
 
 refinement:                                      # Refinement of circle centers by performing a least square fit based on all 4 detections. If refine = false, individual circle center detections are returned.

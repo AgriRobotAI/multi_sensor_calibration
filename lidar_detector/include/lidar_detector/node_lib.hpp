@@ -22,7 +22,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
-// #include <pcl_ros/point_cloud.h>
+#include <pcl_ros/point_cloud.h>
 
 #include "lidar_detector/keypoint_detection.hpp"
 

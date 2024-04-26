@@ -168,8 +168,10 @@ std::vector<std::vector<Lidar::PointWithDist*> > toDistanceRing(pcl::PointCloud<
 /// Create edges point cloud
 pcl::PointCloud<Lidar::PointWithDist> createEdgeCloud(pcl::PointCloud<Lidar::PointWithDist> const & cloud, CloudEdgeFilter const & config, float const average_distance_ring) {
 	pcl::PointCloud<Lidar::PointWithDist> edges_cloud;
-	float min_threshold = average_distance_ring; // min gap is the resolution
+	float min_threshold = 1.2*average_distance_ring; // min gap is the resolution
+	std::cout << "config.radius: " << config.radius << std::endl;
 	float max_threshold = (2*config.radius + 2*average_distance_ring); // Gap cannot be larger than diameter plus 2 times resolution
+
 	for (std::size_t i = 0; i < cloud.size(); ++i) {
 		if (cloud.at(i).distance > min_threshold && cloud.at(i).distance < max_threshold ) { // jump should be smaller or equal to diameter + 2* angeluar resuoltion
 			edges_cloud.push_back(cloud.at(i));
@@ -178,11 +180,12 @@ pcl::PointCloud<Lidar::PointWithDist> createEdgeCloud(pcl::PointCloud<Lidar::Poi
 	if (edges_cloud.size() == 0) {
 		throw pcl::PCLException("Lidar calibration board detection edge cloud does not contain any points.");
 	}
+	std::cout << "size of edges_cloud: " << edges_cloud.size() << std::endl;
 	return edges_cloud;
 }
 
-// Filter outliers and return PointXYZ since velodyne specific info is no longer required from now on
 pcl::PointCloud<pcl::PointXYZ> filterOutliers(std::vector<std::vector<Lidar::PointWithDist*> > const & rings) {
+	// Create point-cloud with points from rings with more than 4 points
 	pcl::PointCloud<pcl::PointXYZ> out;
 	int rings_with_circle = 0;
 	for (std::size_t i = 0; i < rings.size(); ++i) {
@@ -246,6 +249,7 @@ bool processCircle(pcl::PointCloud<pcl::PointXYZ> & cloud, pcl::PointCloud<Lidar
 
 
 	if (inliers->indices.size() == 0) {
+		RCLCPP_ERROR(rclcpp::get_logger("lidar_detector"), "Lidar calibration board detection could not estimate a circle fit for lidar camera edge cloud.");
 	    return false;
 		//throw pcl::PCLException("Lidar calibration board detection could not estimate a circle fit for lidar camera edge cloud.");
 	}
@@ -371,8 +375,9 @@ pcl::PointCloud<pcl::PointXYZ> refinement(pcl::PointCloud<pcl::PointXYZ> pattern
 	return refined_pattern;
 }
 
-pcl::PointCloud<Lidar::PointWithDist> keypointDetection(pcl::PointCloud<Lidar::PointWithDist> const & in, Configuration const & config) {
-// pcl::PointCloud<pcl::PointXYZ> keypointDetection(pcl::PointCloud<Lidar::PointWithDist> const & in, Configuration const & config) {
+// pcl::PointCloud<Lidar::PointWithDist> keypointDetection(pcl::PointCloud<Lidar::PointWithDist> const & in, Configuration const & config) {
+pcl::PointCloud<pcl::PointXYZ> keypointDetection(pcl::PointCloud<Lidar::PointWithDist> const & in, Configuration const & config) {
+	std::cout << "---Keypoint Detection --- " << std::endl;
 	// Passthrough filter
 	pcl::PointCloud<Lidar::PointWithDist> passthrough_cloud = passThrough(in, config.pass_through_filter);
 
@@ -382,30 +387,43 @@ pcl::PointCloud<Lidar::PointWithDist> keypointDetection(pcl::PointCloud<Lidar::P
 	// Compute coefficients of vertical plane and extract points of vertical plane
 	pcl::PointCloud<Lidar::PointWithDist> cloud_calibration_board = filterPlane(cloud_without_ground_floor, config.calibration_board_filter);
 
-	return cloud_calibration_board;
 	// Edge detection: Loop over all rings, and then over all points, and calculate distance w.r.t. neighbors.
-	float average_distance_ring = 0.0;
+	float average_distance_ring = 0.0; // average distance between points in a ring
 	std::vector<std::vector<Lidar::PointWithDist*> > rings = toDistanceRing(cloud_calibration_board, average_distance_ring, config.lidar_parameters);
-	if (config.visualize) { visualize(rings); }
+
+	// Print the number of rings and average ring distance to stdout
+	std::cout << "Number of rings: " << rings.size() << std::endl;
+	std::cout << "Average ring distance: " << average_distance_ring << std::endl;
+	
+	// if (config.visualize) { visualize(rings); }
 
 	// Create unorganized point cloud of edge points
 	pcl::PointCloud<Lidar::PointWithDist> edges_cloud = createEdgeCloud(cloud_calibration_board, config.cloud_edge_filter, average_distance_ring);
 	
-	// // Remove edge points from edge cloud if corresponding ring contains only a < 4 points
-	// std::vector<std::vector<Lidar::PointWithDist*> > edges_rings = getRings(edges_cloud, config.lidar_parameters);
-	// pcl::PointCloud<pcl::PointXYZ> circles_cloud = filterOutliers(edges_rings);
 
-	// // Circle3d fit for all four circles
+	// Remove edge points from edge cloud if corresponding ring contains only a < 4 points
+	std::vector<std::vector<Lidar::PointWithDist*> > edges_rings = getRings(edges_cloud, config.lidar_parameters);
+	pcl::PointCloud<pcl::PointXYZ> circles_cloud = filterOutliers(edges_rings); // Filter out points form rings with less than 4 points
+	std::cout << "circles_cloud: " << circles_cloud.size() << std::endl;
+
+	return circles_cloud;
+
+	// Circle3d fit for all four circles
 	// pcl::PointCloud<pcl::PointXYZ> pattern = processCircles(circles_cloud, cloud_without_ground_floor, config.circle_detection);
+	// std::cout << "pattern before refinement: " << pattern.size() << std::endl;
+
+	// return pattern;
+
 	// if (config.visualize) { visualize(cloud_calibration_board, pattern, edges_cloud); }
+	// // return circles_cloud;
 
 	// // Refine circle centers using calibration board geometry
 	// if (config.refinement.refine) {
 	// 	// Refinement using kabsch
 	// 	pattern = refinement(pattern, config);
 	// }
+	// std::cout << "pattern after refinement: " << pattern.size() << std::endl;
 
-	// return pattern;
 }
 
 } // lidar_detector namespace

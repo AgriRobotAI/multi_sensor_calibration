@@ -21,6 +21,7 @@
 #define PCL_NO_PRECOMPILE
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <rclcpp/rclcpp.hpp>
 
 // We will need to pass header files for the algorithms with which we want the new custom point types to work with
 #include <pcl/visualization/pcl_visualizer.h>
@@ -55,7 +56,7 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(
 namespace lidar_detector {
 
 /// Main function to delete calibration board pose from lidar (velodyne) point cloud
-pcl::PointCloud<Lidar::PointWithDist> keypointDetection(pcl::PointCloud<Lidar::PointWithDist> const & cloud, Configuration const & config);
-// pcl::PointCloud<pcl::PointXYZ> keypointDetection(pcl::PointCloud<Lidar::PointWithDist> const & cloud, Configuration const & config);
+// pcl::PointCloud<Lidar::PointWithDist> keypointDetection(pcl::PointCloud<Lidar::PointWithDist> const & cloud, Configuration const & config);
+pcl::PointCloud<pcl::PointXYZ> keypointDetection(pcl::PointCloud<Lidar::PointWithDist> const & cloud, Configuration const & config);
 
 }
