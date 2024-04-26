@@ -25,18 +25,18 @@ calibration_board_filter:                        # Parameters to extract planar 
     model_type: "sacmodel_parallel_plane"
     return_projected: true
 
+cloud_edge_filter:                               # Parameters to detect edges in pointcloud
+    radius: 0.15                                 # Radius of circles to be fitted. This value is used to adaptively determine thresholds for edge detection.
+    threshold: 0.5                               # TODO: can be removed, because this value is not used.
+
 circle_detection:                                # Parameters to fit circles in pointcloud
-    distance_threshold: 0.0
+    distance_threshold: 0.05
     max_iterations: 1000
     min_radius: 0.1                              # Minimum radius to search for circles
     max_radius: 0.2                              # Maximum radius to search for circles
     cluster_iterations: 100
     max_points_within_radius: 5                  # Maximum nr of points to be allowed within radius (radius_max_points), which determines if circle proposal is valid.
     radius_max_points: 0.15                      # Circle radius to count number of points
-
-cloud_edge_filter:                               # Parameters to detect edges in pointcloud
-    threshold: 0.5                               # TODO: can be removed, because this value is not used.
-    radius: 0.0736                               # Radius of circles to be fitted. This value is used to adaptively determine thresholds for edge detection.
 
 refinement:                                      # Refinement of circle centers by performing a least square fit based on all 4 detections. If refine = false, individual circle center detections are returned.
     refine: false                                 # If yes, return least square fit based on 3 or 4 detections. If no returns, individual detections.
